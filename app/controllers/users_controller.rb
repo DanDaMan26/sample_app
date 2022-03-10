@@ -18,10 +18,9 @@ class UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     if @user.save
-      reset_session 
-      log_in @user 
-      flash[:success] = "Welcome to the Sample app!"
-      redirect_to @user
+      @user.send_activation_email
+      flash[:info] = "Please check your email to activate your account."
+      redirect_to root_url
     else
       render 'new'
     end
@@ -54,21 +53,21 @@ class UsersController < ApplicationController
   
   private
 
-    def user_params
+  def user_params
       params.require(:user).permit(:name, :email, :password,
                                    :password_confirmation)
-    end
+  end
     
     # Before filters
 
     # Confirms a logged-in user.
-    def logged_in_user
+  def logged_in_user
       unless logged_in?
         store_location
   flash[:danger] = "Please log in."
         redirect_to login_url
       end
-    end 
+  end 
         # Confirms the correct user.
     def correct_user
       @user = User.find(params[:id])
